@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recolha Pro - Gestão Administrativa</title>
+    <title>Recolha Pro - Gestão Elite v4.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -17,7 +17,7 @@
         .navbar { background: #1e293b; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .main-container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
         
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
         .kpi-card { background: var(--surface); padding: 1.2rem; border-radius: 0.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid var(--primary); }
         .kpi-label { font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
         .kpi-value { font-size: 1.3rem; font-weight: 800; margin-top: 0.3rem; display: block; }
@@ -28,13 +28,13 @@
         
         .data-table-container { background: white; border-radius: 0.8rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { background: #f8fafc; padding: 0.8rem 1rem; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid #e2e8f0; text-align: left; }
+        th { background: #f8fafc; padding: 0.8rem 1rem; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid #e2e8f0; text-align: left; transition: 0.2s; }
         th:hover { background: #f1f5f9; color: var(--primary); }
         td { padding: 0.8rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .row-link:hover { background: #f0f9ff; cursor: pointer; }
 
         #detail-view { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; backdrop-filter: blur(3px); padding: 2rem; overflow-y: auto; justify-content: center; align-items: flex-start; }
-        .modal-body { background: var(--bg); width: 100%; max-width: 1150px; border-radius: 1rem; margin: 20px auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .modal-body { background: var(--bg); width: 100%; max-width: 1250px; border-radius: 1rem; margin: 20px auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         
         .btn { cursor: pointer; border: none; padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.5rem; }
         .btn-primary { background: var(--primary); color: white; }
@@ -51,7 +51,7 @@
 <div id="login-overlay">
     <div class="login-card">
         <h1 style="color:var(--primary); margin:0">Recolha Pro</h1>
-        <p style="color: #64748b">Acesso Restrito</p>
+        <p style="color: #64748b">Acesso Administrativo</p>
         <input type="password" id="app-pass" placeholder="Senha" style="width: 80%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 0.5rem; margin: 1.5rem 0; text-align: center; font-size: 1.1rem;">
         <button class="btn btn-primary" style="width: 85%; justify-content: center;" onclick="checkPass()">Entrar</button>
     </div>
@@ -62,7 +62,7 @@
     <div style="display: flex; gap: 10px;">
         <input type="file" id="fileInput" style="display: none;" accept=".xlsx, .xls">
         <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📁 Planilha</button>
-        <button class="btn btn-primary" onclick="exportPDF('main-view', 'Relatorio_Geral')">📄 PDF Geral</button>
+        <button class="btn btn-primary" onclick="exportPDF('main-view', 'Relatorio_Geral_Recolha')">📄 Exportar PDF</button>
     </div>
 </nav>
 
@@ -71,7 +71,7 @@
         <div class="filter-group">
             <select id="filterUF" onchange="applyFilters()"><option value="">Brasil (Todos)</option></select>
             <select id="filterStatus" onchange="applyFilters()"><option value="">Todos os Status</option></select>
-            <button class="btn btn-outline" style="margin-left: auto;" onclick="location.reload()">Limpar</button>
+            <button class="btn btn-outline" style="margin-left: auto;" onclick="location.reload()">Limpar Filtros</button>
         </div>
     </div>
 
@@ -80,18 +80,19 @@
         <div class="kpi-card" style="border-top-color: var(--success)"><span class="kpi-label">Recolhido</span><span class="kpi-value" id="kpi-rec" style="color: var(--success)">R$ 0,00</span></div>
         <div class="kpi-card" style="border-top-color: var(--danger)"><span class="kpi-label">Pendente</span><span class="kpi-value" id="kpi-pend" style="color: var(--danger)">R$ 0,00</span></div>
         <div class="kpi-card" style="border-top-color: #7c3aed"><span class="kpi-label">Bonificação OK</span><span class="kpi-value" id="kpi-conv">0</span></div>
+        <div class="kpi-card" style="border-top-color: var(--warning)"><span class="kpi-label">Eficiência Geral</span><span class="kpi-value" id="kpi-perc-global" style="color: var(--warning)">0%</span></div>
     </div>
 
     <div class="data-table-container">
         <table id="rankingTable">
             <thead>
                 <tr>
-                    <th style="width: 25%;" onclick="sortTable('rankingTable', 0, 'string')">Analista</th>
+                    <th style="width: 20%;" onclick="sortTable('rankingTable', 0, 'string')">Analista</th>
                     <th style="width: 10%;" onclick="sortTable('rankingTable', 1, 'number')">Postos</th>
-                    <th style="width: 15%;" onclick="sortTable('rankingTable', 2, 'number')">BONIFICAÇÃO</th>
-                    <th style="width: 15%;" onclick="sortTable('rankingTable', 3, 'currency')">Recolhido</th>
-                    <th style="width: 15%;" onclick="sortTable('rankingTable', 4, 'currency')">Vlr. Pendente</th>
-                    <th style="width: 20%;" onclick="sortTable('rankingTable', 5, 'percent')">Eficiência</th>
+                    <th style="width: 12%;" onclick="sortTable('rankingTable', 2, 'number')">Bonificação</th>
+                    <th style="width: 18%;" onclick="sortTable('rankingTable', 3, 'currency')">Recolhido</th>
+                    <th style="width: 18%;" onclick="sortTable('rankingTable', 4, 'currency')">Vlr. Pendente</th>
+                    <th style="width: 12%;" onclick="sortTable('rankingTable', 5, 'percent')">Eficiência %</th>
                 </tr>
             </thead>
             <tbody id="rankingBody"></tbody>
@@ -104,7 +105,7 @@
         <div style="padding: 1.2rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 1rem 1rem 0 0;">
             <h2 id="detail-user-name" style="margin:0; font-size: 1.1rem;">Performance Individual</h2>
             <div class="no-print" style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" onclick="exportPDF('modal-to-print', 'Relatorio_Analista')">Gerar PDF</button>
+                <button class="btn btn-primary" onclick="exportPDF('modal-to-print', 'Relatorio_Analista')">Exportar PDF</button>
                 <button class="btn btn-outline" style="color:var(--danger)" onclick="closeDetail()">Fechar</button>
             </div>
         </div>
@@ -116,25 +117,25 @@
                     <span class="kpi-value" id="det-rec-val" style="font-size: 1.1rem;">R$ 0,00</span>
                 </div>
                 <div class="kpi-card" style="border-left: 4px solid var(--danger); border-top: none;">
-                    <span class="kpi-label">Pendente</span>
+                    <span class="kpi-label">Pendente Individual</span>
                     <span class="kpi-value" id="det-pend-val" style="font-size: 1.1rem;">R$ 0,00</span>
                 </div>
                 <div class="kpi-card" style="border-left: 4px solid var(--warning); border-top: none;">
-                    <span class="kpi-label">% Eficiência</span>
+                    <span class="kpi-label">Sua Eficiência</span>
                     <span class="kpi-value" id="det-perc-val" style="font-size: 1.1rem;">0%</span>
                 </div>
             </div>
 
             <div style="background:white; padding: 1rem; border-radius: 0.8rem;">
-                <input type="text" id="modalSearch" class="search-box no-print" placeholder="🔍 Buscar CNPJ ou Nome..." oninput="handleModalSearch()" style="width: 100%; padding: 0.7rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 0.4rem; box-sizing: border-box;">
+                <input type="text" id="modalSearch" class="search-box no-print" placeholder="🔍 Buscar CNPJ, Fantasia ou Status..." oninput="handleModalSearch()" style="width: 100%; padding: 0.7rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 0.4rem; box-sizing: border-box;">
                 <table id="postTable">
                     <thead>
                         <tr>
-                            <th onclick="sortModalData(0, 'string')">CNPJ</th>
-                            <th onclick="sortModalData(1, 'string')">Nome Fantasia</th>
-                            <th onclick="sortModalData(2, 'currency')">Recolhido</th>
-                            <th onclick="sortModalData(3, 'currency')">Pendente</th>
-                            <th onclick="sortModalData(4, 'percent')">Status/Meta</th>
+                            <th style="width: 15%;" onclick="sortModalData(0, 'string')">CNPJ</th>
+                            <th style="width: 18%;" onclick="sortModalData(1, 'string')">Status</th>
+                            <th style="width: 30%;" onclick="sortModalData(2, 'string')">Nome Fantasia</th>
+                            <th style="width: 15%;" onclick="sortModalData(3, 'currency')">Recolhido</th>
+                            <th style="width: 12%;" onclick="sortModalData(4, 'percent')">Efic. %</th>
                         </tr>
                     </thead>
                     <tbody id="postsBody"></tbody>
@@ -178,23 +179,26 @@
 
     function applyFilters() {
         const uf = document.getElementById('filterUF').value, st = document.getElementById('filterStatus').value;
-        processData(rawData.filter(r => (!uf || r.UF === uf) && (!st || r.STATUS === st)));
+        const filtered = rawData.filter(r => (!uf || r.UF === uf) && (!st || r.STATUS === st));
+        processData(filtered);
     }
 
     function processData(dados) {
         userStats = {}; let gAR = 0, gRec = 0, gConv = 0;
         dados.forEach(row => {
             const u = row['USUARIO RESPONSAVEL'] || 'Sem Analista', ar = parseFloat(row['VALOR A RECOLHER']) || 0, rec = parseFloat(row['VALOR RECOLHIDO']) || 0;
-            const isC = ar > 0 && (rec / ar) >= 0.9;
+            const pVal = ar > 0 ? (rec / ar * 100) : 0;
             if (!userStats[u]) userStats[u] = { postos: [], ar: 0, rec: 0, conv: 0 };
-            userStats[u].postos.push({ cnpj: row['CNPJ']||'-', fantasia: row['NOME FANTASIA']||'-', ar, rec, pend: ar-rec, perc: ar>0?(rec/ar*100):0, isC });
-            userStats[u].ar += ar; userStats[u].rec += rec; if(isC) { userStats[u].conv++; gConv++; }
+            userStats[u].postos.push({ cnpj: row['CNPJ']||'-', fantasia: row['NOME FANTASIA']||'-', status: row['STATUS']||'-', ar, rec, pend: ar-rec, perc: pVal, isC: pVal >= 90 });
+            userStats[u].ar += ar; userStats[u].rec += rec; if(pVal >= 90) { userStats[u].conv++; gConv++; }
             gAR += ar; gRec += rec;
         });
         document.getElementById('kpi-total').innerText = fmt(gAR);
         document.getElementById('kpi-rec').innerText = fmt(gRec);
         document.getElementById('kpi-pend').innerText = fmt(gAR-gRec);
         document.getElementById('kpi-conv').innerText = gConv;
+        const globalPerc = gAR > 0 ? (gRec / gAR * 100) : 0;
+        document.getElementById('kpi-perc-global').innerText = globalPerc.toFixed(1) + '%';
         renderRanking();
     }
 
@@ -210,7 +214,7 @@
 
     function openDetail(u) {
         currentUser = u; currentPage = 1; 
-        filteredPosts = JSON.parse(JSON.stringify(userStats[u].postos)); // Cópia para não alterar o original
+        filteredPosts = JSON.parse(JSON.stringify(userStats[u].postos));
         const s = userStats[u];
         document.getElementById('detail-user-name').innerText = "Analista: " + u;
         document.getElementById('det-rec-val').innerText = fmt(s.rec);
@@ -223,34 +227,25 @@
         const body = document.getElementById('postsBody'); body.innerHTML = '';
         const paginated = filteredPosts.slice((currentPage-1)*rowsPerPage, currentPage*rowsPerPage);
         paginated.forEach(p => {
-            body.innerHTML += `<tr><td>${p.cnpj}</td><td>${p.fantasia}</td><td>${fmt(p.rec)}</td><td style="color:var(--danger)">${fmt(p.pend)}</td><td><span class="badge ${p.isC?'badge-success':''}" style="background:${p.isC?'':'#f1f5f9'}">${p.isC?'OK':p.perc.toFixed(0)+'%'}</span></td></tr>`;
+            body.innerHTML += `<tr><td>${p.cnpj}</td><td style="font-size:0.7rem; color:#64748b">${p.status}</td><td>${p.fantasia}</td><td>${fmt(p.rec)}</td><td style="font-weight:700; color:${p.perc>=90?'var(--success)':'inherit'}">${p.perc.toFixed(1)}%</td></tr>`;
         });
         renderPagination();
     }
 
-    // NOVA FUNÇÃO DE ORDENAÇÃO PARA O MODAL (Lida com o Array e não com o HTML)
     function sortModalData(colIdx, type) {
         modalSortDir = (modalSortCol === colIdx && modalSortDir === 'asc') ? 'desc' : 'asc';
         modalSortCol = colIdx;
-
         filteredPosts.sort((a, b) => {
-            let valA, valB;
-            switch(colIdx) {
-                case 0: valA = a.cnpj; valB = b.cnpj; break;
-                case 1: valA = a.fantasia; valB = b.fantasia; break;
-                case 2: valA = a.rec; valB = b.rec; break;
-                case 3: valA = a.pend; valB = b.pend; break;
-                case 4: valA = a.perc; valB = b.perc; break;
-            }
-            if (type === 'string') {
-                valA = valA.toLowerCase(); valB = valB.toLowerCase();
-            }
-            if (valA < valB) return modalSortDir === 'asc' ? -1 : 1;
-            if (valA > valB) return modalSortDir === 'asc' ? 1 : -1;
-            return 0;
+            let vA, vB;
+            if(colIdx === 0) { vA = a.cnpj; vB = b.cnpj; }
+            else if(colIdx === 1) { vA = a.status; vB = b.status; }
+            else if(colIdx === 2) { vA = a.fantasia; vB = b.fantasia; }
+            else if(colIdx === 3) { vA = a.rec; vB = b.rec; }
+            else if(colIdx === 4) { vA = a.perc; vB = b.perc; }
+            if(type === 'string') { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
+            return modalSortDir === 'asc' ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
         });
-        currentPage = 1;
-        renderModalTable();
+        currentPage = 1; renderModalTable();
     }
 
     function renderPagination() {
@@ -264,14 +259,16 @@
 
     function handleModalSearch() {
         const t = document.getElementById('modalSearch').value.toLowerCase();
-        filteredPosts = userStats[currentUser].postos.filter(p => p.cnpj.toLowerCase().includes(t) || p.fantasia.toLowerCase().includes(t));
+        filteredPosts = userStats[currentUser].postos.filter(p => p.cnpj.toLowerCase().includes(t) || p.fantasia.toLowerCase().includes(t) || p.status.toLowerCase().includes(t));
         currentPage = 1; renderModalTable();
     }
 
     async function exportPDF(id, name) {
         const canvas = await html2canvas(document.getElementById(id), { scale: 2 });
         const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
         pdf.save(`${name}.pdf`);
     }
 
