@@ -3,52 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recolha Pro - Dashboard v3.0</title>
+    <title>Recolha Pro - Gestão Administrativa</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --primary: #2563eb; --primary-dark: #1d4ed8; --success: #059669; --danger: #dc2626; --warning: #d97706; --bg: #f1f5f9; --surface: #ffffff; --text: #0f172a; }
+        :root { --primary: #2563eb; --success: #059669; --danger: #dc2626; --warning: #d97706; --bg: #f1f5f9; --surface: #ffffff; --text: #0f172a; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
         
-        /* Login Overlay */
         #login-overlay { position:fixed; inset:0; background:#0f172a; z-index:10000; display:flex; align-items:center; justify-content:center; }
         .login-card { background: white; padding: 2.5rem; border-radius: 1rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         
-        /* Layout */
-        .navbar { background: #1e293b; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar { background: #1e293b; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .main-container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
         
-        /* KPI Cards */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .kpi-card { background: var(--surface); padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid var(--primary); }
-        .kpi-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-        .kpi-value { font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem; display: block; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .kpi-card { background: var(--surface); padding: 1.2rem; border-radius: 0.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid var(--primary); }
+        .kpi-label { font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .kpi-value { font-size: 1.3rem; font-weight: 800; margin-top: 0.3rem; display: block; }
 
-        /* Filtros */
-        .filter-bar { background: white; padding: 1.2rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        select, .search-box { padding: 0.6rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; outline: none; font-size: 0.9rem; }
+        .filter-section { background: #ffffff; padding: 1.2rem; border-radius: 1rem; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .filter-group { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+        select { padding: 0.6rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-weight: 600; min-width: 180px; }
         
-        /* Tabelas */
-        .data-table-container { background: white; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
-        th { background: #f8fafc; padding: 1rem; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid #e2e8f0; }
-        th:hover { background: #f1f5f9; }
-        td { padding: 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .data-table-container { background: white; border-radius: 0.8rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background: #f8fafc; padding: 0.8rem 1rem; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid #e2e8f0; text-align: left; }
+        th:hover { background: #f1f5f9; color: var(--primary); }
+        td { padding: 0.8rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .row-link:hover { background: #f0f9ff; cursor: pointer; }
 
-        /* Modal */
-        #detail-view { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; backdrop-filter: blur(4px); padding: 2rem; overflow-y: auto; align-items: flex-start; justify-content: center; }
-        .modal-body { background: var(--bg); width: 100%; max-width: 1100px; border-radius: 1rem; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); margin-top: 20px; margin-bottom: 20px;}
+        #detail-view { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; backdrop-filter: blur(3px); padding: 2rem; overflow-y: auto; justify-content: center; align-items: flex-start; }
+        .modal-body { background: var(--bg); width: 100%; max-width: 1150px; border-radius: 1rem; margin: 20px auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         
-        /* UI Elements */
-        .btn { cursor: pointer; border: none; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+        .btn { cursor: pointer; border: none; padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.5rem; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); }
         .btn-outline { border: 1px solid #cbd5e1; background: white; color: #475569; }
-        .badge { padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; }
+        .badge { padding: 0.3rem 0.6rem; border-radius: 10px; font-size: 0.65rem; font-weight: 800; }
         .badge-success { background: #dcfce7; color: #166534; }
-        .pagination { display: flex; justify-content: center; gap: 15px; margin-top: 1.5rem; align-items: center; padding-bottom: 1rem; }
+        .pagination { display: flex; justify-content: center; gap: 15px; margin-top: 1rem; align-items: center; padding: 1rem; background: white; border-radius: 0 0 1rem 1rem; }
 
         @media print { .no-print { display: none !important; } }
     </style>
@@ -57,58 +50,48 @@
 
 <div id="login-overlay">
     <div class="login-card">
-        <h1 style="color:var(--primary); margin-bottom: 0.5rem;">Recolha Pro</h1>
-        <p style="color: #64748b; margin-bottom: 1.5rem;">Digite a senha de acesso</p>
-        <input type="password" id="app-pass" placeholder="Senha" style="width: 80%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 0.5rem; margin-bottom: 1.5rem; text-align: center; font-size: 1.1rem;">
-        <button class="btn btn-primary" style="width: 85%; justify-content: center;" onclick="checkPass()">Acessar Painel</button>
+        <h1 style="color:var(--primary); margin:0">Recolha Pro</h1>
+        <p style="color: #64748b">Acesso Restrito</p>
+        <input type="password" id="app-pass" placeholder="Senha" style="width: 80%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 0.5rem; margin: 1.5rem 0; text-align: center; font-size: 1.1rem;">
+        <button class="btn btn-primary" style="width: 85%; justify-content: center;" onclick="checkPass()">Entrar</button>
     </div>
 </div>
 
 <nav class="navbar no-print">
-    <div style="font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px;">RECOLHA<span style="color:var(--primary)">PRO</span></div>
-    <div style="display: flex; gap: 12px;">
+    <div style="font-weight: 800; font-size: 1.2rem;">RECOLHA<span style="color:var(--primary)">PRO</span></div>
+    <div style="display: flex; gap: 10px;">
         <input type="file" id="fileInput" style="display: none;" accept=".xlsx, .xls">
-        <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📁 Carregar Excel</button>
-        <button class="btn btn-primary" onclick="exportPDF('main-view', 'Dashboard_Geral')">📄 Exportar PDF</button>
+        <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📁 Planilha</button>
+        <button class="btn btn-primary" onclick="exportPDF('main-view', 'Relatorio_Geral')">📄 PDF Geral</button>
     </div>
 </nav>
 
 <div class="main-container" id="main-view">
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <span class="kpi-label">A Recolher Total</span>
-            <span class="kpi-value" id="kpi-total">R$ 0,00</span>
-        </div>
-        <div class="kpi-card" style="border-top-color: var(--success)">
-            <span class="kpi-label">Total Recolhido</span>
-            <span class="kpi-value" id="kpi-rec" style="color: var(--success)">R$ 0,00</span>
-        </div>
-        <div class="kpi-card" style="border-top-color: var(--danger)">
-            <span class="kpi-label">Valor Pendente</span>
-            <span class="kpi-value" id="kpi-pend" style="color: var(--danger)">R$ 0,00</span>
-        </div>
-        <div class="kpi-card" style="border-top-color: #7c3aed">
-            <span class="kpi-label">Metas Atingidas (≥90%)</span>
-            <span class="kpi-value" id="kpi-conv">0</span>
+    <div class="filter-section no-print">
+        <div class="filter-group">
+            <select id="filterUF" onchange="applyFilters()"><option value="">Brasil (Todos)</option></select>
+            <select id="filterStatus" onchange="applyFilters()"><option value="">Todos os Status</option></select>
+            <button class="btn btn-outline" style="margin-left: auto;" onclick="location.reload()">Limpar</button>
         </div>
     </div>
 
-    <div class="filter-bar no-print">
-        <span style="font-weight: 700; color: #475569;">Filtros Gerais:</span>
-        <select id="filterStatus" onchange="applyMainFilters()"><option value="">Todos os Status</option></select>
-        <select id="filterUF" onchange="applyMainFilters()"><option value="">Todas as UFs</option></select>
-        <button class="btn btn-outline" style="margin-left: auto;" onclick="location.reload()">Limpar Tudo</button>
+    <div class="kpi-grid">
+        <div class="kpi-card"><span class="kpi-label">A Recolher</span><span class="kpi-value" id="kpi-total">R$ 0,00</span></div>
+        <div class="kpi-card" style="border-top-color: var(--success)"><span class="kpi-label">Recolhido</span><span class="kpi-value" id="kpi-rec" style="color: var(--success)">R$ 0,00</span></div>
+        <div class="kpi-card" style="border-top-color: var(--danger)"><span class="kpi-label">Pendente</span><span class="kpi-value" id="kpi-pend" style="color: var(--danger)">R$ 0,00</span></div>
+        <div class="kpi-card" style="border-top-color: #7c3aed"><span class="kpi-label">Bonificação OK</span><span class="kpi-value" id="kpi-conv">0</span></div>
     </div>
 
     <div class="data-table-container">
         <table id="rankingTable">
             <thead>
                 <tr>
-                    <th style="width: 30%;" onclick="sortTable('rankingTable', 0, 'string')">Analista Responsável</th>
-                    <th style="width: 15%;" onclick="sortTable('rankingTable', 1, 'number')">Postos</th>
-                    <th style="width: 15%;" onclick="sortTable('rankingTable', 2, 'number')">Metas OK</th>
-                    <th style="width: 20%;" onclick="sortTable('rankingTable', 3, 'currency')">Vlr. Recolhido</th>
-                    <th style="width: 20%;" onclick="sortTable('rankingTable', 4, 'percent')">Eficiência</th>
+                    <th style="width: 25%;" onclick="sortTable('rankingTable', 0, 'string')">Analista</th>
+                    <th style="width: 10%;" onclick="sortTable('rankingTable', 1, 'number')">Postos</th>
+                    <th style="width: 15%;" onclick="sortTable('rankingTable', 2, 'number')">BONIFICAÇÃO</th>
+                    <th style="width: 15%;" onclick="sortTable('rankingTable', 3, 'currency')">Recolhido</th>
+                    <th style="width: 15%;" onclick="sortTable('rankingTable', 4, 'currency')">Vlr. Pendente</th>
+                    <th style="width: 20%;" onclick="sortTable('rankingTable', 5, 'percent')">Eficiência</th>
                 </tr>
             </thead>
             <tbody id="rankingBody"></tbody>
@@ -118,40 +101,40 @@
 
 <div id="detail-view" onclick="if(event.target === this) closeDetail()">
     <div class="modal-body" id="modal-to-print">
-        <div style="padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 1rem 1rem 0 0;">
-            <h2 id="detail-user-name" style="margin:0; font-size: 1.25rem;">Relatório do Analista</h2>
-            <div class="no-print" style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" onclick="exportPDF('modal-to-print', 'Relatorio_Individual')">PDF</button>
+        <div style="padding: 1.2rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 1rem 1rem 0 0;">
+            <h2 id="detail-user-name" style="margin:0; font-size: 1.1rem;">Performance Individual</h2>
+            <div class="no-print" style="display: flex; gap: 8px;">
+                <button class="btn btn-primary" onclick="exportPDF('modal-to-print', 'Relatorio_Analista')">Gerar PDF</button>
                 <button class="btn btn-outline" style="color:var(--danger)" onclick="closeDetail()">Fechar</button>
             </div>
         </div>
         
-        <div style="padding: 2rem;">
-            <div class="kpi-grid" style="margin-bottom: 1.5rem;">
-                <div class="kpi-card" style="padding:1rem; border-top: none; border-left: 4px solid var(--success)">
-                    <span class="kpi-label">Recolhido</span>
-                    <span class="kpi-value" id="det-rec" style="font-size: 1.2rem;">R$ 0,00</span>
+        <div style="padding: 1.5rem;">
+            <div class="kpi-grid">
+                <div class="kpi-card" style="border-left: 4px solid var(--success); border-top: none;">
+                    <span class="kpi-label">Recolhido Individual</span>
+                    <span class="kpi-value" id="det-rec-val" style="font-size: 1.1rem;">R$ 0,00</span>
                 </div>
-                <div class="kpi-card" style="padding:1rem; border-top: none; border-left: 4px solid var(--danger)">
+                <div class="kpi-card" style="border-left: 4px solid var(--danger); border-top: none;">
                     <span class="kpi-label">Pendente</span>
-                    <span class="kpi-value" id="det-pend" style="font-size: 1.2rem;">R$ 0,00</span>
+                    <span class="kpi-value" id="det-pend-val" style="font-size: 1.1rem;">R$ 0,00</span>
                 </div>
-                <div class="kpi-card" style="padding:1rem; border-top: none; border-left: 4px solid var(--warning)">
-                    <span class="kpi-label">Aproveitamento</span>
-                    <span class="kpi-value" id="det-perc" style="font-size: 1.2rem;">0%</span>
+                <div class="kpi-card" style="border-left: 4px solid var(--warning); border-top: none;">
+                    <span class="kpi-label">% Eficiência</span>
+                    <span class="kpi-value" id="det-perc-val" style="font-size: 1.1rem;">0%</span>
                 </div>
             </div>
 
-            <div style="background:white; padding: 1.2rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <input type="text" id="modalSearch" class="search-box no-print" placeholder="🔍 Buscar por CNPJ ou Nome Fantasia..." oninput="handleModalSearch()" style="width: 100%; box-sizing: border-box; margin-bottom: 1rem;">
+            <div style="background:white; padding: 1rem; border-radius: 0.8rem;">
+                <input type="text" id="modalSearch" class="search-box no-print" placeholder="🔍 Buscar CNPJ ou Nome..." oninput="handleModalSearch()" style="width: 100%; padding: 0.7rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 0.4rem; box-sizing: border-box;">
                 <table id="postTable">
                     <thead>
                         <tr>
-                            <th style="width: 20%;">CNPJ</th>
-                            <th style="width: 40%;">Nome Fantasia</th>
-                            <th style="width: 15%;">Recolhido</th>
-                            <th style="width: 15%;">Pendente</th>
-                            <th style="width: 10%;">Status</th>
+                            <th onclick="sortModalData(0, 'string')">CNPJ</th>
+                            <th onclick="sortModalData(1, 'string')">Nome Fantasia</th>
+                            <th onclick="sortModalData(2, 'currency')">Recolhido</th>
+                            <th onclick="sortModalData(3, 'currency')">Pendente</th>
+                            <th onclick="sortModalData(4, 'percent')">Status/Meta</th>
                         </tr>
                     </thead>
                     <tbody id="postsBody"></tbody>
@@ -163,205 +146,148 @@
 </div>
 
 <script>
-    const SENHA_SISTEMA = "1234"; 
-    let rawData = [];
-    let userStats = {};
-    let currentUser = '';
-    let currentPage = 1;
-    let filteredPosts = [];
-    const rowsPerPage = 10;
+    const SENHA_SISTEMA = "1234";
+    let rawData = [], userStats = {}, currentUser = '', currentPage = 1, filteredPosts = [];
+    let modalSortCol = -1, modalSortDir = 'asc';
+    const rowsPerPage = 12;
 
-    // LOGIN
     function checkPass() {
         if(document.getElementById('app-pass').value === SENHA_SISTEMA) {
             document.getElementById('login-overlay').style.display = 'none';
-        } else {
-            alert("Senha incorreta!");
-        }
+        } else { alert("Senha incorreta!"); }
     }
-    document.getElementById('app-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkPass(); });
 
-    // CARREGAR EXCEL
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onload = function(evt) {
-            const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-            populateFilters();
-            processData(rawData);
+        reader.onload = (evt) => {
+            const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+            rawData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            buildFilters(); applyFilters();
         };
-        reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(e.target.files[0]);
     });
 
-    function populateFilters() {
-        const statusSet = new Set(), ufSet = new Set();
-        rawData.forEach(r => { 
-            if(r.STATUS) statusSet.add(r.STATUS); 
-            if(r.UF) ufSet.add(r.UF);
-        });
-        const fStatus = document.getElementById('filterStatus');
-        const fUF = document.getElementById('filterUF');
-        fStatus.innerHTML = '<option value="">Todos os Status</option>';
-        fUF.innerHTML = '<option value="">Todas as UFs</option>';
-        statusSet.forEach(s => fStatus.innerHTML += `<option value="${s}">${s}</option>`);
-        ufSet.forEach(u => fUF.innerHTML += `<option value="${u}">${u}</option>`);
+    function buildFilters() {
+        const ufSet = new Set(), stSet = new Set();
+        rawData.forEach(r => { if(r.UF) ufSet.add(r.UF); if(r.STATUS) stSet.add(r.STATUS); });
+        const fUF = document.getElementById('filterUF'), fST = document.getElementById('filterStatus');
+        fUF.innerHTML = '<option value="">Brasil (Todos)</option>'; fST.innerHTML = '<option value="">Todos os Status</option>';
+        [...ufSet].sort().forEach(u => fUF.innerHTML += `<option value="${u}">${u}</option>`);
+        [...stSet].sort().forEach(s => fST.innerHTML += `<option value="${s}">${s}</option>`);
     }
 
-    function applyMainFilters() {
-        const s = document.getElementById('filterStatus').value;
-        const u = document.getElementById('filterUF').value;
-        const filtered = rawData.filter(r => (!s || r.STATUS === s) && (!u || r.UF === u));
-        processData(filtered);
+    function applyFilters() {
+        const uf = document.getElementById('filterUF').value, st = document.getElementById('filterStatus').value;
+        processData(rawData.filter(r => (!uf || r.UF === uf) && (!st || r.STATUS === st)));
     }
 
     function processData(dados) {
-        userStats = {};
-        let gAR = 0, gRec = 0, gConv = 0;
-
+        userStats = {}; let gAR = 0, gRec = 0, gConv = 0;
         dados.forEach(row => {
-            const user = row['USUARIO RESPONSAVEL'] || 'Sem Analista';
-            const ar = parseFloat(row['VALOR A RECOLHER']) || 0;
-            const rec = parseFloat(row['VALOR RECOLHIDO']) || 0;
+            const u = row['USUARIO RESPONSAVEL'] || 'Sem Analista', ar = parseFloat(row['VALOR A RECOLHER']) || 0, rec = parseFloat(row['VALOR RECOLHIDO']) || 0;
             const isC = ar > 0 && (rec / ar) >= 0.9;
-
-            if (!userStats[user]) userStats[user] = { postos: [], ar: 0, rec: 0, conv: 0 };
-            
-            userStats[user].postos.push({ 
-                cnpj: row['CNPJ'] || '-', 
-                fantasia: row['NOME FANTASIA'] || '-', 
-                ar: ar, 
-                rec: rec, 
-                pend: ar - rec, 
-                perc: ar > 0 ? (rec/ar*100) : 0,
-                isC: isC 
-            });
-
-            userStats[user].ar += ar; 
-            userStats[user].rec += rec;
-            if(isC) { userStats[user].conv++; gConv++; }
+            if (!userStats[u]) userStats[u] = { postos: [], ar: 0, rec: 0, conv: 0 };
+            userStats[u].postos.push({ cnpj: row['CNPJ']||'-', fantasia: row['NOME FANTASIA']||'-', ar, rec, pend: ar-rec, perc: ar>0?(rec/ar*100):0, isC });
+            userStats[u].ar += ar; userStats[u].rec += rec; if(isC) { userStats[u].conv++; gConv++; }
             gAR += ar; gRec += rec;
         });
-
         document.getElementById('kpi-total').innerText = fmt(gAR);
         document.getElementById('kpi-rec').innerText = fmt(gRec);
-        document.getElementById('kpi-pend').innerText = fmt(gAR - gRec);
+        document.getElementById('kpi-pend').innerText = fmt(gAR-gRec);
         document.getElementById('kpi-conv').innerText = gConv;
         renderRanking();
     }
 
     function renderRanking() {
-        const body = document.getElementById('rankingBody');
-        body.innerHTML = '';
+        const body = document.getElementById('rankingBody'); body.innerHTML = '';
         Object.keys(userStats).sort((a,b) => userStats[b].rec - userStats[a].rec).forEach(u => {
-            const s = userStats[u];
-            const perc = (s.rec/s.ar*100)||0;
-            const tr = document.createElement('tr');
-            tr.className = 'row-link';
-            tr.onclick = () => openDetail(u);
-            tr.innerHTML = `
-                <td><strong>${u}</strong></td>
-                <td>${s.postos.length}</td>
-                <td><span class="badge" style="background:#f3e8ff; color:#7c3aed">${s.conv}</span></td>
-                <td>${fmt(s.rec)}</td>
-                <td style="color:${perc >= 90 ? 'var(--success)' : perc < 50 ? 'var(--danger)' : 'var(--text)'}; font-weight:bold">${perc.toFixed(1)}%</td>
-            `;
+            const s = userStats[u], p = (s.rec/s.ar*100)||0;
+            const tr = document.createElement('tr'); tr.className = 'row-link'; tr.onclick = () => openDetail(u);
+            tr.innerHTML = `<td><strong>${u}</strong></td><td>${s.postos.length}</td><td><span class="badge" style="background:#f3e8ff; color:#7c3aed">${s.conv}</span></td><td>${fmt(s.rec)}</td><td>${fmt(s.ar - s.rec)}</td><td style="font-weight:bold; color:${p>=90?'var(--success)':'#334155'}">${p.toFixed(1)}%</td>`;
             body.appendChild(tr);
         });
     }
 
-    // MODAL DETALHES
     function openDetail(u) {
-        currentUser = u; 
-        currentPage = 1;
-        filteredPosts = [...userStats[u].postos];
-        
-        document.getElementById('detail-user-name').innerText = "Analista: " + u;
+        currentUser = u; currentPage = 1; 
+        filteredPosts = JSON.parse(JSON.stringify(userStats[u].postos)); // Cópia para não alterar o original
         const s = userStats[u];
-        document.getElementById('det-rec').innerText = fmt(s.rec);
-        document.getElementById('det-pend').innerText = fmt(s.ar - s.rec);
-        document.getElementById('det-perc').innerText = ((s.rec/s.ar)*100||0).toFixed(1) + '%';
-        
-        document.getElementById('modalSearch').value = '';
-        renderModalTable();
-        document.getElementById('detail-view').style.display = 'flex';
+        document.getElementById('detail-user-name').innerText = "Analista: " + u;
+        document.getElementById('det-rec-val').innerText = fmt(s.rec);
+        document.getElementById('det-pend-val').innerText = fmt(s.ar - s.rec);
+        document.getElementById('det-perc-val').innerText = ((s.rec/s.ar)*100||0).toFixed(1) + '%';
+        renderModalTable(); document.getElementById('detail-view').style.display = 'flex';
     }
 
     function renderModalTable() {
-        const body = document.getElementById('postsBody');
-        body.innerHTML = '';
-        const start = (currentPage - 1) * rowsPerPage;
-        const paginated = filteredPosts.slice(start, start + rowsPerPage);
-
+        const body = document.getElementById('postsBody'); body.innerHTML = '';
+        const paginated = filteredPosts.slice((currentPage-1)*rowsPerPage, currentPage*rowsPerPage);
         paginated.forEach(p => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${p.cnpj}</td>
-                <td>${p.fantasia}</td>
-                <td>${fmt(p.rec)}</td>
-                <td style="color:var(--danger)">${fmt(p.pend)}</td>
-                <td><span class="badge ${p.isC ? 'badge-success' : ''}" style="background:${p.isC ? '' : '#f1f5f9'}">
-                    ${p.isC ? 'META OK' : p.perc.toFixed(0)+'%'}
-                </span></td>
-            `;
-            body.appendChild(tr);
+            body.innerHTML += `<tr><td>${p.cnpj}</td><td>${p.fantasia}</td><td>${fmt(p.rec)}</td><td style="color:var(--danger)">${fmt(p.pend)}</td><td><span class="badge ${p.isC?'badge-success':''}" style="background:${p.isC?'':'#f1f5f9'}">${p.isC?'OK':p.perc.toFixed(0)+'%'}</span></td></tr>`;
         });
         renderPagination();
     }
 
+    // NOVA FUNÇÃO DE ORDENAÇÃO PARA O MODAL (Lida com o Array e não com o HTML)
+    function sortModalData(colIdx, type) {
+        modalSortDir = (modalSortCol === colIdx && modalSortDir === 'asc') ? 'desc' : 'asc';
+        modalSortCol = colIdx;
+
+        filteredPosts.sort((a, b) => {
+            let valA, valB;
+            switch(colIdx) {
+                case 0: valA = a.cnpj; valB = b.cnpj; break;
+                case 1: valA = a.fantasia; valB = b.fantasia; break;
+                case 2: valA = a.rec; valB = b.rec; break;
+                case 3: valA = a.pend; valB = b.pend; break;
+                case 4: valA = a.perc; valB = b.perc; break;
+            }
+            if (type === 'string') {
+                valA = valA.toLowerCase(); valB = valB.toLowerCase();
+            }
+            if (valA < valB) return modalSortDir === 'asc' ? -1 : 1;
+            if (valA > valB) return modalSortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+        currentPage = 1;
+        renderModalTable();
+    }
+
     function renderPagination() {
-        const total = Math.ceil(filteredPosts.length / rowsPerPage);
-        const cont = document.getElementById('pagination-controls');
-        cont.innerHTML = `
-            <button class="btn btn-outline" onclick="changePage(-1)" ${currentPage===1?'disabled':''}>Anterior</button>
-            <span style="font-size:0.8rem; font-weight:bold; color:#64748b">Página ${currentPage} de ${total || 1}</span>
-            <button class="btn btn-outline" onclick="changePage(1)" ${currentPage===total || total===0?'disabled':''}>Próxima</button>
-        `;
+        const total = Math.ceil(filteredPosts.length/rowsPerPage);
+        document.getElementById('pagination-controls').innerHTML = `<button class="btn btn-outline" onclick="changePage(-1)" ${currentPage===1?'disabled':''}>Anterior</button><span style="font-size:0.75rem">Página ${currentPage} de ${total||1}</span><button class="btn btn-outline" onclick="changePage(1)" ${currentPage===total||total===0?'disabled':''}>Próxima</button>`;
     }
 
     function changePage(v) { currentPage += v; renderModalTable(); }
     function closeDetail() { document.getElementById('detail-view').style.display = 'none'; }
-    function fmt(v) { return parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function fmt(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
     function handleModalSearch() {
         const t = document.getElementById('modalSearch').value.toLowerCase();
-        filteredPosts = userStats[currentUser].postos.filter(p => 
-            String(p.cnpj).toLowerCase().includes(t) || 
-            String(p.fantasia).toLowerCase().includes(t)
-        );
-        currentPage = 1; 
-        renderModalTable();
+        filteredPosts = userStats[currentUser].postos.filter(p => p.cnpj.toLowerCase().includes(t) || p.fantasia.toLowerCase().includes(t));
+        currentPage = 1; renderModalTable();
     }
 
-    // PDF & ORDENAÇÃO
     async function exportPDF(id, name) {
-        const el = document.getElementById(id);
-        const canvas = await html2canvas(el, { scale: 2 });
+        const canvas = await html2canvas(document.getElementById(id), { scale: 2 });
         const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-        const imgW = 210;
-        const imgH = (canvas.height * imgW) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgW, imgH);
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
         pdf.save(`${name}.pdf`);
     }
 
     function sortTable(id, n, type) {
-        const table = document.getElementById(id);
-        const rows = Array.from(table.rows).slice(1);
-        const dir = table.dataset.dir === "asc" ? "desc" : "asc";
-        table.dataset.dir = dir;
+        const table = document.getElementById(id); const rows = Array.from(table.rows).slice(1);
+        const dir = table.dataset.dir === "asc" ? "desc" : "asc"; table.dataset.dir = dir;
         rows.sort((a,b) => {
             let x = a.cells[n].innerText, y = b.cells[n].innerText;
             if(type !== 'string') {
                 x = parseFloat(x.replace(/[R$\.%]/g,'').replace(/\s/g,'').replace(',','.')) || 0;
                 y = parseFloat(y.replace(/[R$\.%]/g,'').replace(/\s/g,'').replace(',','.')) || 0;
-            } else { x = x.toLowerCase(); y = y.toLowerCase(); }
+            }
             return dir === "asc" ? (x > y ? 1 : -1) : (x < y ? 1 : -1);
         });
         rows.forEach(r => table.tBodies[0].appendChild(r));
     }
 </script>
-
 </body>
 </html>
