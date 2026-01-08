@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Gestão de Recolha - KPIs de Performance</title>
+    <title>Sistema de Gestão de Recolha</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -10,74 +10,66 @@
         :root { --primary: #2563eb; --success: #059669; --danger: #dc2626; --warning: #d97706; --bg: #f8fafc; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; }
         .container { max-width: 1300px; margin: auto; }
-        
-        /* Cards */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .upload-section { background: white; border: 2px dashed #cbd5e1; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
-        .grid-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 20px; }
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 10px; border-top: 4px solid var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .stat-box h3 { font-size: 0.65rem; color: #64748b; text-transform: uppercase; margin: 0; }
         .stat-box .value { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
-
-        /* Tables */
         .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
         th { text-align: left; padding: 12px; background: #f1f5f9; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid #e2e8f0; }
-        th:hover { background: #e2e8f0; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .row-clickable:hover { background: #f0f9ff; cursor: pointer; }
-
-        /* Modals */
-        #detail-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; z-index: 1000; padding: 20px 0; }
-        .modal-content { background: var(--bg); margin: auto; padding: 30px; width: 95%; max-width: 1100px; border-radius: 15px; position: relative; }
-        
-        /* Badges */
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
-        .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .badge-neutral { background: #f1f5f9; color: #475569; }
-
-        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-pdf { background: #1e293b; color: white; }
-        .btn-close { background: #ef4444; color: white; float: right; }
-        
+        #detail-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; padding: 20px 0; }
+        .modal-content { background: var(--bg); margin: auto; padding: 25px; width: 95%; max-width: 1150px; border-radius: 15px; position: relative; min-height: 80vh; }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; align-items: center; }
+        .search-box { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; width: 250px; margin-bottom: 10px; }
+        #login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#1e293b; z-index:9999; display:flex; align-items:center; justify-content:center; }
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
 
+<div id="login-overlay">
+    <div style="background:white; padding:40px; border-radius:15px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+        <h2 style="margin-top:0; color:#1e293b">Acesso Restrito</h2>
+        <p style="color:#64748b">Digite a senha para acessar o sistema:</p>
+        <input type="password" id="app-pass" style="padding:10px; width:200px; border:1px solid #ccc; border-radius:5px; margin-bottom:20px;"><br>
+        <button class="btn" style="background:#2563eb; color:white; width:100%" onclick="checkPass()">Entrar</button>
+        <p id="pass-error" style="color:red; display:none; margin-top:10px;">Senha incorreta!</p>
+    </div>
+</div>
+
 <div class="container" id="main-view">
     <div class="header">
-        <div>
-            <h1 style="margin:0; font-size: 1.4rem;">Gestão Operacional de Recolha</h1>
-            <p style="margin:5px 0; color: #64748b;">Foco em Conversão ≥ 90% por CNPJ</p>
-        </div>
-        <button class="btn btn-pdf no-print" onclick="exportPDF('main-view', 'Relatorio_Consolidado')">Exportar Dashboard</button>
+        <h1>Dashboard de Recolha</h1>
+        <button class="btn no-print" style="background:#1e293b; color:white;" onclick="exportPDF('main-view', 'Dashboard_Geral')">Exportar PDF</button>
     </div>
 
     <div class="upload-section no-print">
-        <strong>Selecione o arquivo Excel:</strong> 
         <input type="file" id="fileInput" accept=".xlsx, .xls">
     </div>
 
     <div class="grid-stats">
-        <div class="stat-box"><h3>A Recolher Total</h3><div class="value" id="total-a-recolher">R$ 0,00</div></div>
-        <div class="stat-box" style="border-top-color: var(--success)"><h3>Total Recolhido</h3><div class="value" id="total-recolhido">R$ 0,00</div></div>
-        <div class="stat-box" style="border-top-color: var(--danger)"><h3>Total Pendente</h3><div class="value" id="total-pendente">R$ 0,00</div></div>
+        <div class="stat-box"><h3>A Recolher</h3><div class="value" id="total-a-recolher">R$ 0,00</div></div>
+        <div class="stat-box" style="border-top-color: var(--success)"><h3>Recolhido</h3><div class="value" id="total-recolhido">R$ 0,00</div></div>
         <div class="stat-box" style="border-top-color: #7c3aed"><h3>CNPJs ≥ 90%</h3><div class="value" id="total-convertidos">0</div></div>
         <div class="stat-box" style="border-top-color: var(--warning)"><h3>Eficiência</h3><div class="value" id="total-eficiencia">0%</div></div>
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0;">Ranking de Analistas</h3>
         <table id="rankingTable">
             <thead>
                 <tr>
                     <th onclick="sortTable('rankingTable', 0, 'string')">Analista</th>
                     <th onclick="sortTable('rankingTable', 1, 'number')">Postos</th>
-                    <th onclick="sortTable('rankingTable', 2, 'number')">CNPJs ≥ 90%</th>
+                    <th onclick="sortTable('rankingTable', 2, 'number')">Meta ≥ 90%</th>
                     <th onclick="sortTable('rankingTable', 3, 'currency')">Recolhido</th>
-                    <th onclick="sortTable('rankingTable', 4, 'currency')">Pendente</th>
-                    <th onclick="sortTable('rankingTable', 5, 'percent')">% Conversão</th>
+                    <th onclick="sortTable('rankingTable', 4, 'percent')">%</th>
                 </tr>
             </thead>
             <tbody id="rankingBody"></tbody>
@@ -87,41 +79,53 @@
 
 <div id="detail-view">
     <div class="modal-content" id="modal-to-print">
-        <button class="btn btn-close no-print" onclick="closeDetail()">Voltar</button>
-        <h2 id="detail-user-name">Relatório do Analista</h2>
-        
+        <button class="btn no-print" style="background:#ef4444; color:white; float:right;" onclick="closeDetail()">Fechar</button>
+        <h2 id="detail-user-name" style="margin-top:0;">Detalhes</h2>
         <div class="grid-stats">
-            <div class="stat-box"><h3>Total Postos</h3><div id="det-postos" class="value">0</div></div>
-            <div class="stat-box" style="border-top-color: #7c3aed"><h3>CNPJs ≥ 90%</h3><div id="det-convertidos" class="value">0</div></div>
+            <div class="stat-box"><h3>CNPJs ≥ 90%</h3><div id="det-convertidos" class="value">0</div></div>
             <div class="stat-box"><h3>Recolhido</h3><div id="det-recolhido" class="value">R$ 0,00</div></div>
             <div class="stat-box"><h3>Pendente</h3><div id="det-pendente" class="value">R$ 0,00</div></div>
-            <div class="stat-box"><h3>Aproveitamento</h3><div id="det-perc" class="value">0%</div></div>
         </div>
-
-        <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin:0;">Relação de CNPJs</h3>
-                <button class="btn btn-pdf no-print" onclick="exportPDF('modal-to-print', 'Relatorio_Analista_Foco')">PDF Detalhado</button>
+        <div class="card" style="margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <input type="text" id="modalSearch" class="search-box no-print" placeholder="Buscar..." oninput="handleModalSearch()">
+                <button class="btn no-print" style="background:#1e293b; color:white;" onclick="exportPDF('modal-to-print', 'Relatorio_Analista')">Gerar PDF</button>
             </div>
             <table id="postTable">
                 <thead>
                     <tr>
-                        <th onclick="sortTable('postTable', 0, 'string')">CNPJ</th>
-                        <th onclick="sortTable('postTable', 1, 'string')">Nome Fantasia</th>
-                        <th onclick="sortTable('postTable', 2, 'currency')">Recolhido</th>
-                        <th onclick="sortTable('postTable', 3, 'currency')">Pendente</th>
-                        <th onclick="sortTable('postTable', 4, 'percent')">%</th>
-                        <th>Meta</th>
+                        <th style="width:20%">CNPJ</th>
+                        <th style="width:35%">Nome Fantasia</th>
+                        <th style="width:15%">Recolhido</th>
+                        <th style="width:15%">Pendente</th>
+                        <th style="width:15%">Status</th>
                     </tr>
                 </thead>
                 <tbody id="postsBody"></tbody>
             </table>
+            <div class="pagination no-print" id="pagination-controls"></div>
         </div>
     </div>
 </div>
 
 <script>
+    // SENHA DO SISTEMA
+    const SENHA_SISTEMA = "1234";
+
+    function checkPass() {
+        if(document.getElementById('app-pass').value === SENHA_SISTEMA) {
+            document.getElementById('login-overlay').style.display = 'none';
+        } else {
+            document.getElementById('pass-error').style.display = 'block';
+        }
+    }
+    document.getElementById('app-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkPass(); });
+
     let userStats = {};
+    let currentUser = '';
+    let currentPage = 1;
+    let filteredPosts = [];
+    const rowsPerPage = 12;
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -129,143 +133,118 @@
         reader.onload = function(evt) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            processData(jsonData);
+            processData(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]));
         };
         reader.readAsArrayBuffer(file);
     });
 
     function processData(dados) {
         userStats = {};
-        let gARecolher = 0, gRecolhido = 0, gConvertidos = 0;
-
+        let gARecolher = 0, gRecolhido = 0, gConv = 0;
         dados.forEach(row => {
-            const user = row['USUARIO RESPONSAVEL'] || 'Indefinido';
-            const aRecolher = parseFloat(row['VALOR A RECOLHER']) || 0;
-            const recolhido = parseFloat(row['VALOR RECOLHIDO']) || 0;
-            const pendente = aRecolher - recolhido;
-            const pRecolha = aRecolher > 0 ? (recolhido / aRecolher) : 0;
-            const isConvertido = pRecolha >= 0.9;
-
-            if (!userStats[user]) {
-                userStats[user] = { postos: [], aRecolher: 0, recolhido: 0, pendente: 0, convertidos: 0 };
-            }
-
-            userStats[user].postos.push({
-                cnpj: row['CNPJ'] || '-',
-                fantasia: row['NOME FANTASIA'] || '-',
-                aRecolher: aRecolher,
-                recolhido: recolhido,
-                pendente: pendente,
-                perc: pRecolha * 100,
-                convertido: isConvertido
-            });
-
-            userStats[user].aRecolher += aRecolher;
-            userStats[user].recolhido += recolhido;
-            userStats[user].pendente += pendente;
-            if(isConvertido) {
-                userStats[user].convertidos++;
-                gConvertidos++;
-            }
-            
-            gARecolher += aRecolher;
-            gRecolhido += recolhido;
+            const u = row['USUARIO RESPONSAVEL'] || 'Indefinido';
+            const ar = parseFloat(row['VALOR A RECOLHER']) || 0;
+            const rec = parseFloat(row['VALOR RECOLHIDO']) || 0;
+            const isC = (rec / ar) >= 0.9;
+            if (!userStats[u]) userStats[u] = { postos: [], aRecolher: 0, recolhido: 0, conv: 0 };
+            userStats[u].postos.push({ cnpj: row['CNPJ'], fantasia: row['NOME FANTASIA'], aRec: ar, rec: rec, pend: ar - rec, perc: (rec/ar*100)||0, isC: isC });
+            userStats[u].aRecolher += ar; userStats[u].recolhido += rec;
+            if(isC) { userStats[u].conv++; gConv++; }
+            gARecolher += ar; gRecolhido += rec;
         });
-
         document.getElementById('total-a-recolher').innerText = fmt(gARecolher);
         document.getElementById('total-recolhido').innerText = fmt(gRecolhido);
-        document.getElementById('total-pendente').innerText = fmt(gARecolher - gRecolhido);
-        document.getElementById('total-convertidos').innerText = gConvertidos;
+        document.getElementById('total-convertidos').innerText = gConv;
         document.getElementById('total-eficiencia').innerText = ((gRecolhido/gARecolher)*100 || 0).toFixed(1) + '%';
-
         renderRanking();
     }
 
     function renderRanking() {
         const body = document.getElementById('rankingBody');
         body.innerHTML = '';
-        Object.keys(userStats).forEach(user => {
-            const s = userStats[user];
-            const perc = (s.recolhido / s.aRecolher * 100) || 0;
+        Object.keys(userStats).forEach(u => {
+            const s = userStats[u];
             const tr = document.createElement('tr');
             tr.className = 'row-clickable';
-            tr.onclick = () => showDetail(user);
-            tr.innerHTML = `
-                <td><strong>${user}</strong></td>
-                <td>${s.postos.length}</td>
-                <td style="color:#7c3aed; font-weight:bold">${s.convertidos}</td>
-                <td>${fmt(s.recolhido)}</td>
-                <td style="color:var(--danger)">${fmt(s.pendente)}</td>
-                <td><strong>${perc.toFixed(1)}%</strong></td>
-            `;
+            tr.onclick = () => openDetail(u);
+            tr.innerHTML = `<td><strong>${u}</strong></td><td>${s.postos.length}</td><td style="color:#7c3aed"><b>${s.conv}</b></td><td>${fmt(s.recolhido)}</td><td><b>${((s.recolhido/s.aRecolher)*100||0).toFixed(1)}%</b></td>`;
             body.appendChild(tr);
         });
     }
 
-    function showDetail(user) {
-        const s = userStats[user];
-        document.getElementById('detail-user-name').innerText = "Performance: " + user;
-        document.getElementById('det-postos').innerText = s.postos.length;
-        document.getElementById('det-convertidos').innerText = s.convertidos;
-        document.getElementById('det-recolhido').innerText = fmt(s.recolhido);
-        document.getElementById('det-pendente').innerText = fmt(s.pendente);
-        document.getElementById('det-perc').innerText = ((s.recolhido/s.aRecolher)*100 || 0).toFixed(1) + '%';
-
-        const pBody = document.getElementById('postsBody');
-        pBody.innerHTML = '';
-        s.postos.sort((a,b) => b.perc - a.perc).forEach(p => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${p.cnpj}</td>
-                <td>${p.fantasia}</td>
-                <td>${fmt(p.recolhido)}</td>
-                <td>${fmt(p.pendente)}</td>
-                <td>${p.perc.toFixed(1)}%</td>
-                <td>${p.convertido ? '<span class="badge badge-success">ATINGIDA</span>' : '<span class="badge badge-neutral">EM ANDAMENTO</span>'}</td>
-            `;
-            pBody.appendChild(tr);
-        });
+    function openDetail(user) {
+        currentUser = user; currentPage = 1;
+        filteredPosts = [...userStats[user].postos];
+        document.getElementById('detail-user-name').innerText = user;
+        updateModalStats(); renderModalTable();
         document.getElementById('detail-view').style.display = 'block';
+    }
+
+    function updateModalStats() {
+        const s = userStats[currentUser];
+        document.getElementById('det-convertidos').innerText = s.conv;
+        document.getElementById('det-recolhido').innerText = fmt(s.recolhido);
+        document.getElementById('det-pendente').innerText = fmt(s.aRecolher - s.recolhido);
+    }
+
+    function renderModalTable() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedItems = filteredPosts.slice(start, end);
+        const body = document.getElementById('postsBody');
+        body.innerHTML = '';
+        paginatedItems.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${p.cnpj}</td><td>${p.fantasia}</td><td>${fmt(p.rec)}</td><td>${fmt(p.pend)}</td><td><span class="badge ${p.isC ? 'badge-success' : ''}">${p.isC ? '≥90%' : p.perc.toFixed(0)+'%'}</span></td>`;
+            body.appendChild(tr);
+        });
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredPosts.length / rowsPerPage);
+        const container = document.getElementById('pagination-controls');
+        container.innerHTML = `<button class="btn" onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>Anterior</button>
+            <span>Página ${currentPage} de ${totalPages || 1}</span>
+            <button class="btn" onclick="changePage(1)" ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}>Próxima</button>`;
+    }
+
+    function changePage(step) { currentPage += step; renderModalTable(); }
+
+    function handleModalSearch() {
+        const term = document.getElementById('modalSearch').value.toLowerCase();
+        filteredPosts = userStats[currentUser].postos.filter(p => 
+            String(p.cnpj).toLowerCase().includes(term) || String(p.fantasia).toLowerCase().includes(term)
+        );
+        currentPage = 1; renderModalTable();
     }
 
     function closeDetail() { document.getElementById('detail-view').style.display = 'none'; }
     function fmt(v) { return parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
-    function sortTable(tableId, n, type) {
-        const table = document.getElementById(tableId);
-        let rows, switching = true, i, x, y, shouldSwitch, dir = "asc", switchcount = 0;
-        while (switching) {
-            switching = false;
-            rows = table.rows;
-            for (i = 1; i < (rows.length - 1); i++) {
-                shouldSwitch = false;
-                x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 1].getElementsByTagName("TD")[n];
-                let valX = x.innerText, valY = y.innerText;
-                if (type === 'currency' || type === 'number' || type === 'percent') {
-                    valX = parseFloat(valX.replace(/[R$\.%]/g, '').replace(/\s/g, '').replace(',', '.')) || 0;
-                    valY = parseFloat(valY.replace(/[R$\.%]/g, '').replace(/\s/g, '').replace(',', '.')) || 0;
-                }
-                if (dir == "asc") { if (valX > valY) { shouldSwitch = true; break; } }
-                else { if (valX < valY) { shouldSwitch = true; break; } }
+    function sortTable(id, n, type) {
+        const table = document.getElementById(id);
+        let rows = Array.from(table.rows).slice(1);
+        let dir = table.dataset.dir === "asc" ? "desc" : "asc";
+        table.dataset.dir = dir;
+        rows.sort((a, b) => {
+            let valX = a.cells[n].innerText, valY = b.cells[n].innerText;
+            if (type !== 'string') {
+                valX = parseFloat(valX.replace(/[R$\.%]/g, '').replace(',', '.')) || 0;
+                valY = parseFloat(valY.replace(/[R$\.%]/g, '').replace(',', '.')) || 0;
             }
-            if (shouldSwitch) { rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++; }
-            else { if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; } }
-        }
+            return dir === "asc" ? (valX > valY ? 1 : -1) : (valX < valY ? 1 : -1);
+        });
+        rows.forEach(row => table.tBodies[0].appendChild(row));
     }
 
-    async function exportPDF(elId, filename) {
+    async function exportPDF(elId, name) {
         const { jsPDF } = window.jspdf;
         const element = document.getElementById(elId);
-        const options = { scale: 2, useCORS: true, logging: false };
-        await html2canvas(element, options).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
+        await html2canvas(element, { scale: 1.5 }).then(canvas => {
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const width = pdf.internal.pageSize.getWidth();
-            const height = (canvas.height * width) / canvas.width;
-            pdf.addImage(imgData, 'PNG', 0, 0, width, height);
-            pdf.save(`${filename}.pdf`);
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+            pdf.save(`${name}.pdf`);
         });
     }
 </script>
